@@ -1,4 +1,4 @@
-package labgob
+package simgob
 
 import (
 	"bytes"
@@ -112,7 +112,7 @@ type T4 struct {
 }
 
 // make sure we check capitalization
-// labgob prints one warning during this test.
+// simgob prints one warning during this test.
 func TestCapital(t *testing.T) {
 	e0 := errorCount
 
@@ -137,7 +137,7 @@ func TestCapital(t *testing.T) {
 // RPC but the target into which we're decoding holds a non-default
 // value, which GOB seems not to overwrite as you'd expect.
 //
-// labgob does not print a warning.
+// simgob does not print a warning.
 func TestDefault(t *testing.T) {
 	e0 := errorCount
 
