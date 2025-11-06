@@ -51,7 +51,8 @@ package labrpc
 
 import (
 	"bytes"
-	"log"
+	"fmt"
+	"log/slog"
 	"math/rand"
 	"reflect"
 	"strings"
@@ -115,7 +116,8 @@ func (e *ClientEnd) Call(svcMeth string, args interface{}, reply interface{}) bo
 		rb := bytes.NewBuffer(rep.reply)
 		rd := labgob.NewDecoder(rb)
 		if err := rd.Decode(reply); err != nil {
-			log.Fatalf("ClientEnd.Call(): decode reply: %v\n", err)
+			slog.Error("ClientEnd.Call(): decode reply", "error", err)
+			panic(fmt.Sprintf("ClientEnd.Call(): decode reply: %v", err))
 		}
 		return true
 	} else {
@@ -316,7 +318,8 @@ func (rn *Network) MakeEnd(endname interface{}) *ClientEnd {
 	defer rn.mu.Unlock()
 
 	if _, ok := rn.ends[endname]; ok {
-		log.Fatalf("MakeEnd: %v already exists\n", endname)
+		slog.Error("MakeEnd: endpoint already exists", "endname", endname)
+		panic(fmt.Sprintf("MakeEnd: %v already exists", endname))
 	}
 
 	e := &ClientEnd{}
@@ -422,9 +425,12 @@ func (rs *Server) dispatch(req reqMsg) replyMsg {
 		for k, _ := range rs.services {
 			choices = append(choices, k)
 		}
-		log.Fatalf("labrpc.Server.dispatch(): unknown service %v in %v.%v; expecting one of %v\n",
-			serviceName, serviceName, methodName, choices)
-		return replyMsg{false, nil}
+		slog.Error("labrpc.Server.dispatch(): unknown service",
+			"service", serviceName,
+			"method", methodName,
+			"choices", choices)
+		panic(fmt.Sprintf("labrpc.Server.dispatch(): unknown service %v in %v.%v; expecting one of %v",
+			serviceName, serviceName, methodName, choices))
 	}
 }
 
@@ -505,8 +511,11 @@ func (svc *Service) dispatch(methname string, req reqMsg) replyMsg {
 		for k, _ := range svc.methods {
 			choices = append(choices, k)
 		}
-		log.Fatalf("labrpc.Service.dispatch(): unknown method %v in %v; expecting one of %v\n",
-			methname, req.svcMeth, choices)
-		return replyMsg{false, nil}
+		slog.Error("labrpc.Service.dispatch(): unknown method",
+			"method", methname,
+			"svcMeth", req.svcMeth,
+			"choices", choices)
+		panic(fmt.Sprintf("labrpc.Service.dispatch(): unknown method %v in %v; expecting one of %v",
+			methname, req.svcMeth, choices))
 	}
 }

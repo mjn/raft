@@ -12,7 +12,7 @@ import (
 	crand "crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"log"
+	"log/slog"
 	"math/big"
 	"math/rand"
 	"runtime"
@@ -195,10 +195,8 @@ func (cfg *config) start1(i int) {
 			}
 
 			if err_msg != "" {
-				log.Fatalf("apply error: %v\n", err_msg)
-				cfg.applyErr[i] = err_msg
-				// keep reading after error so that Raft doesn't block
-				// holding locks...
+				slog.Error("apply error", "error", err_msg)
+				panic(fmt.Sprintf("apply error: %v", err_msg))
 			}
 		}
 	}()
